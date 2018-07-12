@@ -71,6 +71,7 @@ class Codebird
       'production' => 'https://ads-api.twitter.com/2/',
       'sandbox'    => 'https://ads-api-sandbox.twitter.com/2/'
     ],
+    'promedia'        => 'https://api.twitter.com/1.1/',
     'media'        => 'https://upload.twitter.com/1.1/',
     'publish'      => 'https://publish.twitter.com/',
     'oauth'        => 'https://api.twitter.com/',
@@ -1925,6 +1926,19 @@ class Codebird
     $medias = [
       'media/metadata/create',
       'media/upload',
+    ];
+    return in_array($method, $medias);
+  }
+
+  /**
+   * Detects if API call should use pro media endpoint
+   *
+   * @param string $method The API method to call
+   *
+   * @return bool Whether the method is defined in media API
+   */
+  protected function _detectProMedia($method) {
+    $medias = [
       'media/library/add'
     ];
     return in_array($method, $medias);
@@ -2008,6 +2022,8 @@ class Codebird
     $url = self::$_endpoints['rest'] . $method . '.json';
     if (substr($method_template, 0, 5) === 'oauth') {
       $url = self::$_endpoints['oauth'] . $method;
+    } elseif ($this->_detectProMedia($method_template)) {
+      $url = self::$_endpoints['promedia'] . $method . '.json';
     } elseif ($this->_detectMedia($method_template)) {
       $url = self::$_endpoints['media'] . $method . '.json';
     } elseif ($method_template === 'statuses/oembed') {
@@ -2661,7 +2677,7 @@ class Codebird
  * Catch errors when authtoken is expired
  */
 class CodebirdAuthException extends \Exception {
-	
+
 }
 
 
@@ -2669,14 +2685,14 @@ class CodebirdAuthException extends \Exception {
  * Catch error when credentials are not set correclty
  */
 class CodebirdCredentialsException extends \Exception {
-	
+
 }
 
 /**
  * Catch errors r elated to bad endpoi ts
  */
 class CodebirdEndpointException extends \Exception {
-	
+
 }
 
 /*
@@ -2684,6 +2700,5 @@ class CodebirdEndpointException extends \Exception {
  */
 
 class CodebirdMediaException extends \Exception {
-	
-}
 
+}
